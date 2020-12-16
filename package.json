@@ -3,13 +3,23 @@
   "version": "1.0.0",
   "main": "index.js",
   "license": "MIT",
+  "scripts": {
+    "start": "cross-env NODE_ENV=production gulp serve",
+    "dev": "gulp serve"
+  },
   "devDependencies": {
     "@babel/core": "^7.12.10",
     "@babel/preset-env": "^7.12.11",
     "autoprefixer": "^9",
+    "babel-eslint": "^10.1.0",
     "browser-sync": "^2.26.13",
+    "cross-env": "^7.0.3",
+    "eslint-config-airbnb-base": "^14.2.1",
+    "eslint-plugin-import": "^2.22.1",
     "gulp": "^4.0.2",
     "gulp-babel": "^8.0.0",
+    "gulp-eslint": "^6.0.0",
+    "gulp-if": "^3.0.0",
     "gulp-image-resize": "^0.13.1",
     "gulp-imagemin": "^7.1.0",
     "gulp-load-plugins": "^2.0.6",

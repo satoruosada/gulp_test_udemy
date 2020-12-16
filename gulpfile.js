@@ -1,4 +1,4 @@
-const {src, dest, watch} = require('gulp');
+const {src, dest, watch, series, parallel} = require('gulp');
 const loadPlugins = require('gulp-load-plugins');
 const $ = loadPlugins();
 const pkg = require('./package.json');
@@ -7,6 +7,7 @@ const sizes = conf.sizes;
 const autoprefixer = require('autoprefixer');
 const browserSync = require('browser-sync');
 const server = browserSync.create();
+const isProd = process.env.NODE_ENV === "production";
 
 
 function icon(done){
@@ -29,21 +30,29 @@ function icon(done){
 
 function styles() {
     return src('./src/sass/main.scss')
-        .pipe($.sourcemaps.init())
+    .pipe($.if(!isProd, $.sourcemaps.init()))
         .pipe($.sass())
         .pipe($.postcss([
             autoprefixer(['last 3 versions', 'ie >= 8', 'Android >= 4', 'iOS >= 8'])
         ]))
-        .pipe($.sourcemaps.write('.'))
+        .pipe($.if(!isProd, $.sourcemaps.write('.')))
         .pipe(dest('./dist/css'));
 }
 
 function scripts() {
     return src('./src/js/*.js')
-        .pipe($.sourcemaps.init())
+        .pipe($.if(!isProd, $.sourcemaps.init()))
         .pipe($.babel())
-        .pipe($.sourcemaps.write('.'))
+        .pipe($.if(!isProd, $.sourcemaps.write('.')))
         .pipe(dest('./dist/js'));
+}
+
+function lint() {
+    return src('./src/js/*.js')
+        .pipe($.eslint({ fix: true }))
+        .pipe($.eslint.format())
+        .pipe($.eslint.failAfterError())
+        .pipe(dest('./src/js'))
 }
 
 function startAppServer(){
@@ -56,7 +65,10 @@ function startAppServer(){
     watch('./src/**/*.scss').on('change', server.reload);
 }
 
+const serve = series(parallel(styles, series(lint, scripts)), startAppServer);
+
 exports.icon = icon;
 exports.styles = styles;
 exports.scripts = scripts;
-exports.serve = startAppServer;
+exports.lint = lint;
+exports.serve = serve;
